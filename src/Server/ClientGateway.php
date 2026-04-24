@@ -32,6 +32,7 @@ use Mcp\Schema\Notification\LoggingMessageNotification;
 use Mcp\Schema\Notification\ProgressNotification;
 use Mcp\Schema\Request\CreateSamplingMessageRequest;
 use Mcp\Schema\Request\ElicitRequest;
+use Mcp\Schema\Request\ElicitWebRequest;
 use Mcp\Schema\Result\CreateSamplingMessageResult;
 use Mcp\Schema\Result\ElicitResult;
 use Mcp\Server\Session\SessionInterface;
@@ -178,6 +179,34 @@ class ClientGateway
     public function elicit(string $message, ElicitationSchema $requestedSchema, int $timeout = 120): ElicitResult
     {
         $request = new ElicitRequest($message, $requestedSchema);
+
+        $response = $this->request($request, $timeout);
+
+        if ($response instanceof Error) {
+            throw new ClientException($response);
+        }
+
+        return ElicitResult::fromArray($response->result);
+    }
+
+    /**
+     * Convenience method for web mode elicitation requests.
+     *
+     * Requests consent to load an external website from the user via the client. The user can
+     * accept (opening a new window), decline, or cancel the request.
+     *
+     * @param string            $message         A human-readable message describing what information is needed
+     * @param string            $url             The URL of the website to send the user to
+     * @param string            $elicitationId   A unique identifier to identify this requesy
+     * @param int               $timeout         The timeout in seconds
+     *
+     * @return ElicitResult The elicitation response containing the user's action and any provided content
+     *
+     * @throws ClientException if the client request results in an error message
+     */
+    public function web(string $message, string $url, string $elicitationId, int $timeout = 120): ElicitResult
+    {
+        $request = new ElicitWebRequest($message, $url, $elicitationId);
 
         $response = $this->request($request, $timeout);
 
