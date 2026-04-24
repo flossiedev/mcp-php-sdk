@@ -1,5 +1,5 @@
 {
-  "name": "mcp/sdk",
+  "name": "flossiedev/mcp-php-sdk",
   "description": "Model Context Protocol SDK for Client and Server applications in PHP",
   "license": "Apache-2.0",
   "type": "library",
